@@ -15,6 +15,18 @@ pip install -r requirements.txt
 
 cp .env.template .env
 ```
+
+### Запуск Docker
+```
+ docker-compose -f docker-compose.yml up --build
+```
+
+### Миграции БД
+```
+docker-compose -f docker-compose.yml run --rm web-app sh -c "python manage.py makemigrations"
+docker-compose -f docker-compose.yml run --rm web-app sh -c "python manage.py migrate"       
+```
+
 ### Задание
 
 https://www.craft.me/s/n6OVYFVUpq0o6L
