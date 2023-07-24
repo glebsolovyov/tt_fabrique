@@ -8,7 +8,11 @@ class MailingService:
     def __get_all_mailings(self):
         return self.model.objects.all()
 
-    def get_statistics_for_mailings(self):
+    def get_statistics_for_mailings(self) -> list:
+        """
+
+        :return: list
+        """
         data = []
         mailings = self.__get_all_mailings()
         for mailing in mailings:
@@ -29,7 +33,11 @@ class MailingService:
 
         return data
 
-    def get_detailed_statistics_for_mailings(self):
+    def get_detailed_statistics_for_mailings(self) -> list:
+        """
+
+        :return: list
+        """
         data = []
         mailings = self.__get_all_mailings()
 

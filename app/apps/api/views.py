@@ -1,8 +1,13 @@
+from typing import Optional
+
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from django.http import Http404
+
 from apps.api.models.models import Mailing, Client, Message
 from apps.api.serializers import MailingSerializer, ClientSerializer, MessageSerializer
+
 from core.mixins import APIViewMixin, CreateAPIViewMixin
 from core.services.client_service import ClientService
 from core.services.mailing_service import MailingService
@@ -22,7 +27,12 @@ class MailingStatisticsAPIView(APIView):
     model = Mailing
     serializer_class = MailingSerializer
 
-    def get(self, request):
+    def get(self, request) -> Response:
+        """
+
+        :param request:
+        :return: Response
+        """
         return Response(data=MailingService().get_statistics_for_mailings())
 
 
@@ -30,7 +40,12 @@ class MailingDetailedStatisticsAPIView(APIView):
     model = Mailing
     serializer_class = MailingSerializer
 
-    def get(self, request):
+    def get(self, request) -> Response:
+        """
+
+        :param request:
+        :return: Response
+        """
         return Response(data=MailingService().get_detailed_statistics_for_mailings())
 
 
@@ -42,7 +57,12 @@ class ClientAPIView(APIViewMixin):
 class ClientCreateAPIView(CreateAPIViewMixin):
     serializer_class = ClientSerializer
 
-    def post(self, request):
+    def post(self, request) -> Response:
+        """
+
+        :param request:
+        :return: Response
+        """
         data = request.data
         timezone = data.get('timezone')
 
@@ -63,10 +83,16 @@ class SendMessageToClientAPIView(APIView):
     model = Message
     serializer_class = MessageSerializer
 
-    def get(self, request, pk):
+    def get(self, request, pk: Optional[int]) -> Response:
+        """
+
+        :param request:
+        :param pk:
+        :return: Response
+        """
         unsent_messages = SendMessageService().get_unsent_messages()
         try:
             SendMessageService().run_celery_task(mailing_id=pk)
             return Response(data={'unsent_messages': unsent_messages})
-        except (Mailing.DoesNotExist, ConnectionError) as error:
+        except (Mailing.DoesNotExist, ConnectionError, Http404) as error:
             Response(data={'error': error})

@@ -6,12 +6,18 @@ from typing import Optional
 from rest_framework.generics import get_object_or_404
 
 from config import settings
+from core.configs.api import MAILING_NUMBER_OF_ATTEMPTS, API_TOKEN
 from apps.api.models.models import Message, UnsentMessage, Mailing
 from apps.api import tasks
 
 class SendMessageService:
 
-    def send_messages(self, data: Optional[dict]):
+    def send_messages(self, data: Optional[dict]) -> Optional[int]:
+        """
+
+        :param data:
+        :return: Optional[int]
+        """
         message_id = data.get('message_id')
         phone = data.get('phone')
         text = data.get('text')
@@ -19,7 +25,7 @@ class SendMessageService:
         unsent = None
         message = get_object_or_404(Message, id=message_id)
 
-        for i in range(1):
+        for i in range(MAILING_NUMBER_OF_ATTEMPTS):
             data = {
                 'id': message_id,
                 'phone': phone,
@@ -28,7 +34,7 @@ class SendMessageService:
 
             headers = {
                 'accept': 'application/json',
-                "Authorization": f'Bearer {settings.API_TOKEN}',
+                "Authorization": f'Bearer {API_TOKEN}',
                 'Content-Type': 'application/json',
             }
 
@@ -51,7 +57,12 @@ class SendMessageService:
         return unsent
 
 
-    def get_message_data(self, mailing_id) -> list:
+    def get_message_data(self, mailing_id: Optional[int]) -> list:
+        """
+
+        :param mailing_id:
+        :return: list
+        """
         data = []
 
         mailing = Mailing.objects.filter(id=mailing_id).first()
@@ -84,13 +95,20 @@ class SendMessageService:
             raise Mailing.DoesNotExist('Рассылки с таким идентификатором не существует')
 
     def run_celery_task(self, mailing_id: Optional[int]) -> None:
+        """
 
+        :param mailing_id:
+        """
         message_data = SendMessageService().get_message_data(mailing_id=mailing_id)
         for data in message_data:
             datetime_start = data.get('datetime_start')
             tasks.send_messages_task.apply_async(args=[data], eta=datetime_start)
 
     def get_unsent_messages(self) -> list:
+        """
+
+        :return: list
+        """
         unsent_messages = UnsentMessage.objects.all()
         unsent_messages_list = []
         for message in unsent_messages:

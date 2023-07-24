@@ -11,7 +11,13 @@ class ClientService:
 
     model = Client
 
-    def create(self, data: Optional[dict], timezone: Optional[str]):
+    def create(self, data: Optional[dict], timezone: Optional[str]) -> Response:
+        """
+
+        :param data:
+        :param timezone:
+        :return: Response
+        """
         new_data = data.copy()
 
         if not timezone:

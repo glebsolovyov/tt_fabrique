@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.api.models.models import Mailing, Client, Message
+from apps.api.models.models import Mailing, Client, Message, UnsentMessage
 
 
 class MailingSerializer(serializers.ModelSerializer):
