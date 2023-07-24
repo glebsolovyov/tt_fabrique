@@ -1,0 +1,39 @@
+services:
+  web-app:
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app
+    env_file:
+      - ./app/.env
+    command: >
+      sh -c "python manage.py runserver 0.0.0.0:8000"
+
+    depends_on:
+      - database
+
+  database:
+    image: postgres:15.3-alpine3.18
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./app/.env
+
+  redis:
+    image: redis:7.0.12-alpine
+    hostname: redis
+
+  worker:
+    build:
+      context: .
+    hostname: worker
+    entrypoint: celery
+    command: -A config.celery.app worker --loglevel=info
+    volumes:
+      - ./app:/app
+    links:
+      - redis
+    depends_on:
+      - redis
